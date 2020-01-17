@@ -1,0 +1,252 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "parameters": [
+          {
+            "id": "f40fe8b0-044a-48ac-bc44-000c33d77899",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "value": [
+              "/subscriptions/5733bcb3-7fde-4caf-8629-41dc15e3b352"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "includeAll": true
+            }
+          },
+          {
+            "id": "75140817-77b6-4b8e-bc21-792221059fa4",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| summarize by id, name\r\n| project id",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "value": [
+              "/subscriptions/5733bcb3-7fde-4caf-8629-41dc15e3b352/resourceGroups/CH-OpsRG-Pri/providers/Microsoft.OperationalInsights/workspaces/CH-LA"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "9f4d3032-23e9-4d2c-ba2e-53dd729d8d92",
+            "version": "KqlParameterItem/1.0",
+            "name": "Source",
+            "type": 2,
+            "isRequired": true,
+            "query": "VMConnection\r\n| project Computer | distinct Computer\r\n| order by Computer asc",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "value": "DC01.NA.contosohotels.com",
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          },
+          {
+            "id": "09eeefe5-4388-45f1-a980-01efe8318bad",
+            "version": "KqlParameterItem/1.0",
+            "name": "Time",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 259200000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                }
+              ]
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "VMConnection\r\n| where Computer == \"{Source}\" \r\n| extend TotalBytes = BytesReceived + BytesSent \r\n| extend TotalBytesKB = TotalBytes / 1024\r\n| extend TotalBytesMB = TotalBytesKB / 1024\r\n| summarize count(TotalBytesMB) by tostring(DestinationPort)",
+        "size": 0,
+        "title": "Amount of traffic per port",
+        "noDataMessage": "No data to show",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "Time",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart",
+        "graphSettings": {
+          "type": 0
+        }
+      },
+      "customWidth": "40",
+      "name": "query - 3"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "VMConnection\r\n| where Computer == \"{Source}\" \r\n| extend Computer_B = DestinationIp\r\n| extend Computer_A = Computer\r\n| distinct Computer_A, Computer_B, RemoteDnsCanonicalNames, DestinationPort, Direction\r\n",
+        "size": 0,
+        "title": "Outgoing and incoming traffic per unique port",
+        "noDataMessage": "No data collected",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "Time",
+        "showExportToExcel": true,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "sortBy": []
+      },
+      "customWidth": "60",
+      "name": "query - 1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "VMConnection\r\n| where Computer == \"{Source}\" \r\n| extend TotalBytes = BytesReceived + BytesSent \r\n| extend TotalBytesKB = TotalBytes /1024\r\n| extend TotalBytesMB = TotalBytesKB / 1024\r\n| project Computer, TotalBytesMB, SourceIp, DestinationIp, RemoteLongitude, RemoteLatitude ",
+        "size": 0,
+        "title": "Network traffic heatmap",
+        "noDataMessage": "No data collected",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "Time",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "map",
+        "mapSettings": {
+          "locInfo": "LatLong",
+          "latitude": "RemoteLatitude",
+          "longitude": "RemoteLongitude",
+          "sizeSettings": "TotalBytesMB",
+          "sizeAggregation": "Sum",
+          "legendMetric": "TotalBytesMB",
+          "legendAggregation": "Sum",
+          "itemColorSettings": {
+            "nodeColorField": "TotalBytesMB",
+            "colorAggregation": "Sum",
+            "type": "heatmap",
+            "heatmapPalette": "coldHot"
+          }
+        }
+      },
+      "customWidth": "60",
+      "name": "query - 3"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "VMConnection\r\n| where Computer == \"{Source}\"\r\n| summarize MB = ((sum(BytesSent)/1024)/1024) by ProcessName \r\n| order by MB desc ",
+        "size": 0,
+        "title": "Mb Sent per process",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "Time",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "ProcessName",
+              "formatter": 0,
+              "formatOptions": {
+                "showIcon": true
+              }
+            },
+            {
+              "columnMatch": "MB",
+              "formatter": 0,
+              "formatOptions": {
+                "showIcon": true
+              }
+            }
+          ],
+          "labelSettings": [
+            {
+              "columnId": "ProcessName",
+              "label": "Process Name"
+            },
+            {
+              "columnId": "MB",
+              "label": "Sent Mb"
+            }
+          ]
+        }
+      },
+      "customWidth": "40",
+      "name": "query - 4"
+    }
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
